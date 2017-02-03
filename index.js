@@ -27,15 +27,27 @@ module.exports = () => {
 
 	if (process.platform === 'win32') {
 		try {
-			// binary: https://github.com/sindresorhus/win-term-size
-			const size = execa.sync(path.join(__dirname, 'win-term-size.exe')).stdout.split(/\r?\n/);
+			// Binary: https://github.com/sindresorhus/win-term-size
+			const size = execa.sync(path.join(__dirname, 'vendor/win-term-size.exe')).stdout.split(/\r?\n/);
 
 			if (size.length === 2) {
 				return create(size[0], size[1]);
 			}
 		} catch (err) {}
 	} else {
+		if (process.platform === 'darwin') {
+			try {
+				// Binary is from https://www.xquartz.org
+				const size = execa.shellSync(path.join(__dirname, 'vendor/resize'), ['-u']).stdout.match(/\d+/g);
+
+				if (size.length === 2) {
+					return create(size[0], size[1]);
+				}
+			} catch (err) {}
+		}
+
 		// `resize` is preferred as it works even when all file descriptors are redirected
+		// https://linux.die.net/man/1/resize
 		try {
 			const size = execa.sync('resize', ['-u']).stdout.match(/\d+/g);
 

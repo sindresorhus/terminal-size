@@ -1,7 +1,7 @@
 {
   "name": "term-size",
   "version": "0.1.1",
-  "description": "Reliably get the terminal window size",
+  "description": "Reliably get the terminal window size (columns & rows)",
   "license": "MIT",
   "repository": "sindresorhus/term-size",
   "author": {
@@ -30,17 +30,15 @@
     "columns",
     "rows",
     "lines",
-    "tty"
+    "tty",
+    "redirected"
   ],
   "dependencies": {
-    "execa": "^0.4.0"
+    "execa": "^0.6.3"
   },
   "devDependencies": {
     "ava": "*",
-    "execa": "^0.4.0",
+    "execa": "^0.6.3",
     "xo": "*"
-  },
-  "xo": {
-    "esnext": true
   }
 }

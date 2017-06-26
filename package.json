@@ -34,11 +34,10 @@
     "redirected"
   ],
   "dependencies": {
-    "execa": "^0.6.3"
+    "execa": "^0.7.0"
   },
   "devDependencies": {
     "ava": "*",
-    "execa": "^0.6.3",
     "xo": "*"
   }
 }

@@ -10,7 +10,7 @@ Confirmed working on macOS, Linux, and Windows.
 ## Install
 
 ```
-$ npm install --save term-size
+$ npm install term-size
 ```
 
 

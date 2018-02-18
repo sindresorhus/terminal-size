@@ -1,6 +1,6 @@
 import test from 'ava';
 import execa from 'execa';
-import m from './';
+import m from '.';
 
 test('main', t => {
 	const size = m();

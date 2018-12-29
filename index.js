@@ -8,9 +8,7 @@ const create = (columns, rows) => ({
 });
 
 module.exports = () => {
-	const env = process.env;
-	const stdout = process.stdout;
-	const stderr = process.stderr;
+	const {env, stdout, stderr} = process;
 
 	if (stdout && stdout.columns && stdout.rows) {
 		return create(stdout.columns, stdout.rows);
@@ -33,7 +31,7 @@ module.exports = () => {
 			if (size.length === 2) {
 				return create(size[0], size[1]);
 			}
-		} catch (err) {}
+		} catch (error) {}
 	} else {
 		if (process.platform === 'darwin') {
 			try {
@@ -43,7 +41,7 @@ module.exports = () => {
 				if (size.length === 2) {
 					return create(size[0], size[1]);
 				}
-			} catch (err) {}
+			} catch (error) {}
 		}
 
 		// `resize` is preferred as it works even when all file descriptors are redirected
@@ -54,7 +52,7 @@ module.exports = () => {
 			if (size.length === 2) {
 				return create(size[0], size[1]);
 			}
-		} catch (err) {}
+		} catch (error) {}
 
 		try {
 			const columns = execa.sync('tput', ['cols']).stdout;
@@ -63,7 +61,7 @@ module.exports = () => {
 			if (columns && rows) {
 				return create(columns, rows);
 			}
-		} catch (err) {}
+		} catch (error) {}
 	}
 
 	return create(80, 24);

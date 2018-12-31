@@ -1,4 +1,4 @@
-# term-size [![Build Status: Linux & macOS](https://travis-ci.org/sindresorhus/term-size.svg?branch=master)](https://travis-ci.org/sindresorhus/term-size) [![Build Status: Windows](https://ci.appveyor.com/api/projects/status/c3tydg6uedsk0bob/branch/master?svg=true)](https://ci.appveyor.com/project/sindresorhus/term-size/branch/master)
+# term-size [![Build Status](https://travis-ci.org/sindresorhus/term-size.svg?branch=master)](https://travis-ci.org/sindresorhus/term-size)
 
 > Reliably get the terminal window size
 

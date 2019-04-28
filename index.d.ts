@@ -1,5 +1,5 @@
-declare namespace termSize {
-	interface TermSize {
+declare namespace terminalSize {
+	interface Size {
 		columns: number;
 		rows: number;
 	}
@@ -10,12 +10,12 @@ Reliably get the terminal window size.
 
 @example
 ```
-import termSize = require('term-size');
+import terminalSize = require('term-size');
 
-termSize();
+terminalSize();
 //=> {columns: 143, rows: 24}
 ```
 */
-declare function termSize(): termSize.TermSize;
+declare function terminalSize(): terminalSize.Size;
 
-export = termSize;
+export = terminalSize;

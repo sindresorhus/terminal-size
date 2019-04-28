@@ -1,6 +1,6 @@
 import {expectType} from 'tsd';
-import termSize = require('.');
+import terminalSize = require('.');
 
-const size: termSize.TermSize = termSize();
+const size: terminalSize.Size = terminalSize();
 expectType<number>(size.columns);
 expectType<number>(size.rows);

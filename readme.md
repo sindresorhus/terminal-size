@@ -28,7 +28,7 @@ termSize();
 
 ### termSize()
 
-Returns an `Object` with `columns` and `rows` properties.
+Returns an `object` with `columns` and `rows` properties.
 
 
 ## Related

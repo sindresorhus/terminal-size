@@ -1,10 +1,10 @@
 'use strict';
-const {spawnSync} = require('child_process');
+const {execFileSync} = require('child_process');
 const path = require('path');
 
-const spawn = (cmd, args) => spawnSync(cmd, args || [], {encoding: 'utf8'}).stdout.trim();
+const exec = (cmd, args) => execFileSync(cmd, args || [], {encoding: 'utf8'}).trim();
 
-const spawnSh = cmd => spawn('/bin/sh', ['-c', `"${cmd}"`]);
+const execSh = cmd => exec('/bin/sh', ['-c', `"${cmd}"`]);
 
 const create = (columns, rows) => ({
 	columns: parseInt(columns, 10),
@@ -30,7 +30,7 @@ module.exports = () => {
 	if (process.platform === 'win32') {
 		try {
 			// Binary: https://github.com/sindresorhus/win-term-size
-			const size = spawn(path.join(__dirname, 'vendor/windows/term-size.exe')).split(/\r?\n/);
+			const size = exec(path.join(__dirname, 'vendor/windows/term-size.exe')).split(/\r?\n/);
 
 			if (size.length === 2) {
 				return create(size[0], size[1]);
@@ -40,7 +40,7 @@ module.exports = () => {
 		if (process.platform === 'darwin') {
 			try {
 				// Binary: https://github.com/sindresorhus/macos-term-size
-				const size = spawnSh(path.join(__dirname, 'vendor/macos/term-size')).split(/\r?\n/);
+				const size = execSh(path.join(__dirname, 'vendor/macos/term-size')).split(/\r?\n/);
 
 				if (size.length === 2) {
 					return create(size[0], size[1]);
@@ -51,7 +51,7 @@ module.exports = () => {
 		// `resize` is preferred as it works even when all file descriptors are redirected
 		// https://linux.die.net/man/1/resize
 		try {
-			const size = spawn('resize', ['-u']).match(/\d+/g);
+			const size = exec('resize', ['-u']).match(/\d+/g);
 
 			if (size.length === 2) {
 				return create(size[0], size[1]);
@@ -59,8 +59,8 @@ module.exports = () => {
 		} catch (_) {}
 
 		try {
-			const columns = spawn('tput', ['cols']);
-			const rows = spawn('tput', ['lines']);
+			const columns = exec('tput', ['cols']);
+			const rows = exec('tput', ['lines']);
 
 			if (columns && rows) {
 				return create(columns, rows);

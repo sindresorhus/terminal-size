@@ -33,9 +33,7 @@
 		"tty",
 		"redirected"
 	],
-	"dependencies": {
-		"strip-eof": "^2.0.0"
-	},
+	"dependencies": {},
 	"devDependencies": {
 		"ava": "^1.4.1",
 		"execa": "^1.0.0",

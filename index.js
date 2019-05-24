@@ -1,9 +1,8 @@
 'use strict';
 const {spawnSync} = require('child_process');
 const path = require('path');
-const stripEof = require('strip-eof');
 
-const spawn = (cmd, args) => stripEof(spawnSync(cmd, args || [], {encoding: 'utf8'}).stdout);
+const spawn = (cmd, args) => spawnSync(cmd, args || [], {encoding: 'utf8'}).stdout.trim();
 
 const spawnSh = cmd => spawn('/bin/sh', ['-c', `"${cmd}"`]);
 

@@ -2,7 +2,7 @@
 const {execFileSync} = require('child_process');
 const path = require('path');
 
-const exec = (cmd, args, shell) => execFileSync(cmd, args || [], {encoding: 'utf8', shell}).trim();
+const exec = (command, arguments_, shell) => execFileSync(command, arguments_, {encoding: 'utf8', shell}).trim();
 
 const create = (columns, rows) => ({
 	columns: parseInt(columns, 10),

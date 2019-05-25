@@ -1,6 +1,8 @@
 'use strict';
+const {execFileSync} = require('child_process');
 const path = require('path');
-const execa = require('execa');
+
+const exec = (cmd, args, shell) => execFileSync(cmd, args || [], {encoding: 'utf8', shell}).trim();
 
 const create = (columns, rows) => ({
 	columns: parseInt(columns, 10),
@@ -26,7 +28,7 @@ module.exports = () => {
 	if (process.platform === 'win32') {
 		try {
 			// Binary: https://github.com/sindresorhus/win-term-size
-			const size = execa.sync(path.join(__dirname, 'vendor/windows/term-size.exe')).stdout.split(/\r?\n/);
+			const size = exec(path.join(__dirname, 'vendor/windows/term-size.exe')).split(/\r?\n/);
 
 			if (size.length === 2) {
 				return create(size[0], size[1]);
@@ -36,7 +38,7 @@ module.exports = () => {
 		if (process.platform === 'darwin') {
 			try {
 				// Binary: https://github.com/sindresorhus/macos-term-size
-				const size = execa.shellSync(path.join(__dirname, 'vendor/macos/term-size')).stdout.split(/\r?\n/);
+				const size = exec(path.join(__dirname, 'vendor/macos/term-size'), [], true).split(/\r?\n/);
 
 				if (size.length === 2) {
 					return create(size[0], size[1]);
@@ -47,7 +49,7 @@ module.exports = () => {
 		// `resize` is preferred as it works even when all file descriptors are redirected
 		// https://linux.die.net/man/1/resize
 		try {
-			const size = execa.sync('resize', ['-u']).stdout.match(/\d+/g);
+			const size = exec('resize', ['-u']).match(/\d+/g);
 
 			if (size.length === 2) {
 				return create(size[0], size[1]);
@@ -55,8 +57,8 @@ module.exports = () => {
 		} catch (_) {}
 
 		try {
-			const columns = execa.sync('tput', ['cols']).stdout;
-			const rows = execa.sync('tput', ['lines']).stdout;
+			const columns = exec('tput', ['cols']);
+			const rows = exec('tput', ['lines']);
 
 			if (columns && rows) {
 				return create(columns, rows);

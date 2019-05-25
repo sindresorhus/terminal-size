@@ -2,9 +2,7 @@
 const {execFileSync} = require('child_process');
 const path = require('path');
 
-const exec = (cmd, args) => execFileSync(cmd, args || [], {encoding: 'utf8'}).trim();
-
-const execSh = cmd => exec('/bin/sh', ['-c', `"${cmd}"`]);
+const exec = (cmd, args, shell) => execFileSync(cmd, args || [], {encoding: 'utf8', shell: !!shell}).trim();
 
 const create = (columns, rows) => ({
 	columns: parseInt(columns, 10),
@@ -40,7 +38,7 @@ module.exports = () => {
 		if (process.platform === 'darwin') {
 			try {
 				// Binary: https://github.com/sindresorhus/macos-term-size
-				const size = execSh(path.join(__dirname, 'vendor/macos/term-size')).split(/\r?\n/);
+				const size = exec(path.join(__dirname, 'vendor/macos/term-size'), [], true).split(/\r?\n/);
 
 				if (size.length === 2) {
 					return create(size[0], size[1]);

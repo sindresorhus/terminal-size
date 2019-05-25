@@ -33,7 +33,6 @@
 		"tty",
 		"redirected"
 	],
-	"dependencies": {},
 	"devDependencies": {
 		"ava": "^1.4.1",
 		"execa": "^1.0.0",

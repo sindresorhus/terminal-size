@@ -15,3 +15,11 @@ test('child', async t => {
 	t.true(parseInt(columns, 10) > 0);
 	t.true(parseInt(rows, 10) > 0);
 });
+
+test('no TERM env var', t => {
+	process.env.TERM = undefined;
+	const size = termSize();
+	console.log('no TERM size:', size);
+	t.true(size.columns > 0);
+	t.true(size.rows > 0);
+});

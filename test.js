@@ -16,10 +16,13 @@ test('child', async t => {
 	t.true(parseInt(rows, 10) > 0);
 });
 
-test('no TERM env var', t => {
+test('no TERM environment variable', t => {
+	const envTerm = process.env.TERM;
 	process.env.TERM = undefined;
 	const size = termSize();
-	console.log('no TERM size:', size);
+	process.env.TERM = envTerm;
+
+	console.log('Size with no $TERM:', size);
 	t.true(size.columns > 0);
 	t.true(size.rows > 0);
 });

@@ -6,13 +6,11 @@ Because [`process.stdout.columns`](https://nodejs.org/api/tty.html#tty_writestre
 
 Confirmed working on macOS, Linux, and Windows.
 
-
 ## Install
 
 ```
 $ npm install term-size
 ```
-
 
 ## Usage
 
@@ -23,18 +21,15 @@ termSize();
 //=> {columns: 143, rows: 24}
 ```
 
-
 ## API
 
 ### termSize()
 
 Returns an `object` with `columns` and `rows` properties.
 
-
 ## Related
 
 - [term-size-cli](https://github.com/sindresorhus/term-size-cli) - CLI for this module
-
 
 ---
 

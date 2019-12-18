@@ -10,7 +10,8 @@ test('main', t => {
 });
 
 test('child', async t => {
-	const [columns, rows] = (await execa.stdout('node', ['fixture.js'])).split('\n').map(Number);
+	const {stdout} = await execa('node', ['fixture.js']);
+	const [columns, rows] = stdout.split('\n').map(Number);
 	console.log('Child size:', {columns, rows});
 	t.true(parseInt(columns, 10) > 0);
 	t.true(parseInt(rows, 10) > 0);

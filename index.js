@@ -56,14 +56,16 @@ module.exports = () => {
 			}
 		} catch (_) {}
 
-		try {
-			const columns = exec('tput', ['cols']);
-			const rows = exec('tput', ['lines']);
+		if (process.env.TERM) {
+			try {
+				const columns = exec('tput', ['cols']);
+				const rows = exec('tput', ['lines']);
 
-			if (columns && rows) {
-				return create(columns, rows);
-			}
-		} catch (_) {}
+				if (columns && rows) {
+					return create(columns, rows);
+				}
+			} catch (_) {}
+		}
 	}
 
 	return create(80, 24);

@@ -27,6 +27,10 @@ termSize();
 
 Returns an `object` with `columns` and `rows` properties.
 
+## Info
+
+The bundled macOS binary is signed and hardened.
+
 ## Related
 
 - [term-size-cli](https://github.com/sindresorhus/term-size-cli) - CLI for this module

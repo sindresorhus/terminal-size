@@ -1,6 +1,6 @@
 {
 	"name": "term-size",
-	"version": "2.2.0",
+	"version": "2.2.1",
 	"description": "Reliably get the terminal window size (columns & rows)",
 	"license": "MIT",
 	"repository": "sindresorhus/term-size",

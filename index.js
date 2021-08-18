@@ -1,15 +1,18 @@
-'use strict';
-const {execFileSync} = require('child_process');
-const path = require('path');
+import process from 'node:process';
+import {execFileSync} from 'node:child_process';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const exec = (command, arguments_, shell) => execFileSync(command, arguments_, {encoding: 'utf8', shell}).trim();
 
 const create = (columns, rows) => ({
-	columns: parseInt(columns, 10),
-	rows: parseInt(rows, 10)
+	columns: Number.parseInt(columns, 10),
+	rows: Number.parseInt(rows, 10),
 });
 
-module.exports = () => {
+export default function terminalSize() {
 	const {env, stdout, stderr} = process;
 
 	if (stdout && stdout.columns && stdout.rows) {
@@ -33,7 +36,7 @@ module.exports = () => {
 			if (size.length === 2) {
 				return create(size[0], size[1]);
 			}
-		} catch (_) {}
+		} catch {}
 	} else {
 		if (process.platform === 'darwin') {
 			try {
@@ -43,7 +46,7 @@ module.exports = () => {
 				if (size.length === 2) {
 					return create(size[0], size[1]);
 				}
-			} catch (_) {}
+			} catch {}
 		}
 
 		// `resize` is preferred as it works even when all file descriptors are redirected
@@ -54,7 +57,7 @@ module.exports = () => {
 			if (size.length === 2) {
 				return create(size[0], size[1]);
 			}
-		} catch (_) {}
+		} catch {}
 
 		if (process.env.TERM) {
 			try {
@@ -64,9 +67,9 @@ module.exports = () => {
 				if (columns && rows) {
 					return create(columns, rows);
 				}
-			} catch (_) {}
+			} catch {}
 		}
 	}
 
 	return create(80, 24);
-};
+}

@@ -1,5 +1,4 @@
-'use strict';
-const termSize = require('.');
+import terminalSize from './index.js';
 
-const size = termSize();
-console.log(`${size.columns}\n${size.rows}`);
+const {columns, rows} = terminalSize();
+console.log(`${columns}\n${rows}`);

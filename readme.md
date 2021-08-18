@@ -15,15 +15,15 @@ $ npm install term-size
 ## Usage
 
 ```js
-const termSize = require('term-size');
+import terminalSize from 'term-size';
 
-termSize();
+terminalSize();
 //=> {columns: 143, rows: 24}
 ```
 
 ## API
 
-### termSize()
+### terminalSize()
 
 Returns an `object` with `columns` and `rows` properties.
 

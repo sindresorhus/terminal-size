@@ -5,7 +5,8 @@ import {fileURLToPath} from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const exec = (command, arguments_, shell) => execFileSync(command, arguments_, {encoding: 'utf8', shell}).trim();
+const exec = (command, arguments_, shell) =>
+	execFileSync(command, arguments_, {encoding: 'utf8', shell, stdio: ['ignore', 'pipe', 'ignore']}).trim();
 
 const create = (columns, rows) => ({
 	columns: Number.parseInt(columns, 10),

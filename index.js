@@ -3,10 +3,13 @@ import {execFileSync} from 'node:child_process';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
 const exec = (command, arguments_, shell) =>
 	execFileSync(command, arguments_, {encoding: 'utf8', shell, stdio: ['ignore', 'pipe', 'ignore']}).trim();
+
+function execNative(command, shell) {
+	const __dirname = path.dirname(fileURLToPath(import.meta.url));
+	return exec(path.join(__dirname, command), [], shell).split(/\r?\n/);
+}
 
 const create = (columns, rows) => ({
 	columns: Number.parseInt(columns, 10),
@@ -32,7 +35,7 @@ export default function terminalSize() {
 	if (process.platform === 'win32') {
 		try {
 			// Binary: https://github.com/sindresorhus/win-term-size
-			const size = exec(path.join(__dirname, 'vendor/windows/term-size.exe')).split(/\r?\n/);
+			const size = execNative('vendor/windows/term-size.exe', false);
 
 			if (size.length === 2) {
 				return create(size[0], size[1]);
@@ -42,7 +45,7 @@ export default function terminalSize() {
 		if (process.platform === 'darwin') {
 			try {
 				// Binary: https://github.com/sindresorhus/macos-term-size
-				const size = exec(path.join(__dirname, 'vendor/macos/term-size'), [], true).split(/\r?\n/);
+				const size = execNative('vendor/macos/term-size', true);
 
 				if (size.length === 2) {
 					return create(size[0], size[1]);

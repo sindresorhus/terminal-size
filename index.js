@@ -1,7 +1,10 @@
 import process from 'node:process';
 import {execFileSync} from 'node:child_process';
-import path from 'node:path';
-import {fileURLToPath} from 'node:url';
+import fs from 'node:fs';
+import tty from 'node:tty';
+
+const defaultColumns = 80;
+const defaultRows = 24;
 
 const exec = (command, arguments_, {shell, env} = {}) =>
 	execFileSync(command, arguments_, {
@@ -12,15 +15,24 @@ const exec = (command, arguments_, {shell, env} = {}) =>
 		env,
 	}).trim();
 
-function execNative(command, {shell} = {}) {
-	const __dirname = path.dirname(fileURLToPath(import.meta.url));
-	return exec(path.join(__dirname, command), [], {shell}).split(/\r?\n/);
-}
-
 const create = (columns, rows) => ({
 	columns: Number.parseInt(columns, 10),
 	rows: Number.parseInt(rows, 10),
 });
+
+const createIfNotDefault = (maybeColumns, maybeRows) => {
+	const {columns, rows} = create(maybeColumns, maybeRows);
+
+	if (Number.isNaN(columns) || Number.isNaN(rows)) {
+		return;
+	}
+
+	if (columns === defaultColumns && rows === defaultRows) {
+		return;
+	}
+
+	return {columns, rows};
+};
 
 export default function terminalSize() {
 	const {env, stdout, stderr} = process;
@@ -38,45 +50,32 @@ export default function terminalSize() {
 		return create(env.COLUMNS, env.LINES);
 	}
 
+	const fallback = {
+		columns: defaultColumns,
+		rows: defaultRows,
+	};
+
 	if (process.platform === 'win32') {
-		try {
-			// Binary: https://github.com/sindresorhus/win-term-size
-			const size = execNative('vendor/windows/term-size.exe', {shell: false});
-
-			if (size.length === 2) {
-				return create(size[0], size[1]);
-			}
-		} catch {}
-	} else {
-		if (process.platform === 'darwin') {
-			try {
-				// Binary: https://github.com/sindresorhus/macos-term-size
-				const size = execNative('vendor/macos/term-size', {shell: true});
-
-				if (size.length === 2) {
-					return create(size[0], size[1]);
-				}
-			} catch {}
-		}
-
-		// `resize` is preferred as it works even when all file descriptors are redirected
-		// https://linux.die.net/man/1/resize
-		try {
-			const size = exec('resize', ['-u']).match(/\d+/g);
-
-			if (size.length === 2) {
-				return create(size[0], size[1]);
-			}
-		} catch {}
-
-		const tputResult = tput();
-		if (tputResult) {
-			return tputResult;
-		}
+		// We include `tput` for Windows users using Git Bash.
+		return tput() ?? fallback;
 	}
 
-	return create(80, 24);
+	if (process.platform === 'darwin') {
+		return devTty() ?? tput() ?? fallback;
+	}
+
+	return devTty() ?? tput() ?? resize() ?? fallback;
 }
+
+const devTty = () => {
+	try {
+		// eslint-disable-next-line no-bitwise
+		const flags = process.platform === 'darwin' ? fs.constants.O_EVTONLY | fs.constants.O_NONBLOCK : fs.constants.O_NONBLOCK;
+		// eslint-disable-next-line new-cap
+		const {columns, rows} = tty.WriteStream(fs.openSync('/dev/tty', flags));
+		return {columns, rows};
+	} catch {}
+};
 
 // On macOS, this only returns correct values when stdout is not redirected.
 const tput = () => {
@@ -86,7 +85,20 @@ const tput = () => {
 		const rows = exec('tput', ['lines'], {env: {TERM: 'dumb', ...process.env}});
 
 		if (columns && rows) {
-			return create(columns, rows);
+			return createIfNotDefault(columns, rows);
+		}
+	} catch {}
+};
+
+// Only exists on Linux.
+const resize = () => {
+	// `resize` is preferred as it works even when all file descriptors are redirected
+	// https://linux.die.net/man/1/resize
+	try {
+		const size = exec('resize', ['-u']).match(/\d+/g);
+
+		if (size.length === 2) {
+			return createIfNotDefault(size[0], size[1]);
 		}
 	} catch {}
 };

@@ -1,9 +1,9 @@
 {
-	"name": "term-size",
+	"name": "terminal-size",
 	"version": "3.0.2",
 	"description": "Reliably get the terminal window size (columns & rows)",
 	"license": "MIT",
-	"repository": "sindresorhus/term-size",
+	"repository": "sindresorhus/terminal-size",
 	"funding": "https://github.com/sponsors/sindresorhus",
 	"author": {
 		"name": "Sindre Sorhus",

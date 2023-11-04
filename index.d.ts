@@ -1,7 +1,7 @@
-export interface TerminalSize {
+export type TerminalSize = {
 	columns: number;
 	rows: number;
-}
+};
 
 /**
 Reliably get the terminal window size.

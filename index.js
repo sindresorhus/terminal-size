@@ -3,12 +3,18 @@ import {execFileSync} from 'node:child_process';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
-const exec = (command, arguments_, shell) =>
-	execFileSync(command, arguments_, {encoding: 'utf8', shell, stdio: ['ignore', 'pipe', 'ignore']}).trim();
+const exec = (command, arguments_, {shell, env} = {}) =>
+	execFileSync(command, arguments_, {
+		encoding: 'utf8',
+		stdio: ['ignore', 'pipe', 'ignore'],
+		timeout: 500,
+		shell,
+		env,
+	}).trim();
 
-function execNative(command, shell) {
+function execNative(command, {shell} = {}) {
 	const __dirname = path.dirname(fileURLToPath(import.meta.url));
-	return exec(path.join(__dirname, command), [], shell).split(/\r?\n/);
+	return exec(path.join(__dirname, command), [], {shell}).split(/\r?\n/);
 }
 
 const create = (columns, rows) => ({
@@ -19,15 +25,15 @@ const create = (columns, rows) => ({
 export default function terminalSize() {
 	const {env, stdout, stderr} = process;
 
-	if (stdout && stdout.columns && stdout.rows) {
+	if (stdout?.columns && stdout?.rows) {
 		return create(stdout.columns, stdout.rows);
 	}
 
-	if (stderr && stderr.columns && stderr.rows) {
+	if (stderr?.columns && stderr?.rows) {
 		return create(stderr.columns, stderr.rows);
 	}
 
-	// These values are static, so not the first choice
+	// These values are static, so not the first choice.
 	if (env.COLUMNS && env.LINES) {
 		return create(env.COLUMNS, env.LINES);
 	}
@@ -35,7 +41,7 @@ export default function terminalSize() {
 	if (process.platform === 'win32') {
 		try {
 			// Binary: https://github.com/sindresorhus/win-term-size
-			const size = execNative('vendor/windows/term-size.exe', false);
+			const size = execNative('vendor/windows/term-size.exe', {shell: false});
 
 			if (size.length === 2) {
 				return create(size[0], size[1]);
@@ -45,7 +51,7 @@ export default function terminalSize() {
 		if (process.platform === 'darwin') {
 			try {
 				// Binary: https://github.com/sindresorhus/macos-term-size
-				const size = execNative('vendor/macos/term-size', true);
+				const size = execNative('vendor/macos/term-size', {shell: true});
 
 				if (size.length === 2) {
 					return create(size[0], size[1]);
@@ -63,17 +69,24 @@ export default function terminalSize() {
 			}
 		} catch {}
 
-		if (process.env.TERM) {
-			try {
-				const columns = exec('tput', ['cols']);
-				const rows = exec('tput', ['lines']);
-
-				if (columns && rows) {
-					return create(columns, rows);
-				}
-			} catch {}
+		const tputResult = tput();
+		if (tputResult) {
+			return tputResult;
 		}
 	}
 
 	return create(80, 24);
 }
+
+// On macOS, this only returns correct values when stdout is not redirected.
+const tput = () => {
+	try {
+		// `tput` requires the `TERM` environment variable to be set.
+		const columns = exec('tput', ['cols'], {env: {TERM: 'dumb', ...process.env}});
+		const rows = exec('tput', ['lines'], {env: {TERM: 'dumb', ...process.env}});
+
+		if (columns && rows) {
+			return create(columns, rows);
+		}
+	} catch {}
+};

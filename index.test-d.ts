@@ -1,5 +1,5 @@
 import {expectType} from 'tsd';
-import terminalSize, {TerminalSize} from './index.js';
+import terminalSize, {type TerminalSize} from './index.js';
 
 const size: TerminalSize = terminalSize();
 expectType<number>(size.columns);

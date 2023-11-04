@@ -8,8 +8,8 @@ Confirmed working on macOS, Linux, and Windows.
 
 ## Install
 
-```
-$ npm install term-size
+```sh
+npm install term-size
 ```
 
 ## Usage
@@ -34,15 +34,3 @@ The bundled macOS binary is signed and hardened.
 ## Related
 
 - [term-size-cli](https://github.com/sindresorhus/term-size-cli) - CLI for this module
-
----
-
-<div align="center">
-	<b>
-		<a href="https://tidelift.com/subscription/pkg/npm-term-size?utm_source=npm-term-size&utm_medium=referral&utm_campaign=readme">Get professional support for this package with a Tidelift subscription</a>
-	</b>
-	<br>
-	<sub>
-		Tidelift helps make open source sustainable for maintainers while giving companies<br>assurances about security, maintenance, and licensing for their dependencies.
-	</sub>
-</div>

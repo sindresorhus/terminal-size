@@ -34,6 +34,37 @@ const createIfNotDefault = (maybeColumns, maybeRows) => {
 	return {columns, rows};
 };
 
+const isForegroundProcess = () => {
+	if (process.platform !== 'linux') {
+		return true;
+	}
+
+	try {
+		const statContents = fs.readFileSync('/proc/self/stat', 'utf8');
+		const closingParenthesisIndex = statContents.lastIndexOf(') ');
+
+		if (closingParenthesisIndex === -1) {
+			return false;
+		}
+
+		const statFields = statContents.slice(closingParenthesisIndex + 2).trim().split(/\s+/);
+		const processGroupId = Number.parseInt(statFields[2], 10);
+		const foregroundProcessGroupId = Number.parseInt(statFields[5], 10);
+
+		if (Number.isNaN(processGroupId) || Number.isNaN(foregroundProcessGroupId)) {
+			return false;
+		}
+
+		if (foregroundProcessGroupId <= 0) {
+			return false;
+		}
+
+		return processGroupId === foregroundProcessGroupId;
+	} catch {
+		return false;
+	}
+};
+
 export default function terminalSize() {
 	const {env, stdout, stderr} = process;
 
@@ -95,6 +126,10 @@ const resize = () => {
 	// `resize` is preferred as it works even when all file descriptors are redirected
 	// https://linux.die.net/man/1/resize
 	try {
+		if (!isForegroundProcess()) {
+			return;
+		}
+
 		const size = exec('resize', ['-u']).match(/\d+/g);
 
 		if (size.length === 2) {

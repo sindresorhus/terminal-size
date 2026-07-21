@@ -99,13 +99,26 @@ export default function terminalSize() {
 }
 
 const devTty = () => {
+	let fd;
 	try {
 		// eslint-disable-next-line no-bitwise
 		const flags = process.platform === 'darwin' ? fs.constants.O_EVTONLY | fs.constants.O_NONBLOCK : fs.constants.O_NONBLOCK;
+		fd = fs.openSync('/dev/tty', flags);
 		// eslint-disable-next-line new-cap
-		const {columns, rows} = tty.WriteStream(fs.openSync('/dev/tty', flags));
+		const stream = tty.WriteStream(fd);
+		// A WriteStream can emit 'error' asynchronously on teardown; with no
+		// listener attached that would crash the process.
+		stream.on('error', () => {});
+		const {columns, rows} = stream;
+		stream.destroy();
 		return {columns, rows};
-	} catch {}
+	} catch {} finally {
+		if (fd !== undefined) {
+			try {
+				fs.closeSync(fd);
+			} catch {}
+		}
+	}
 };
 
 // On macOS, this only returns correct values when stdout is not redirected.

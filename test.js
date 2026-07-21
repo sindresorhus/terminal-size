@@ -80,3 +80,43 @@ test('no TERM environment variable', t => {
 	t.true(size.columns > 0);
 	t.true(size.rows > 0);
 });
+
+test('devTty does not leak /dev/tty file descriptors across many terminalSize() calls', t => {
+	// The leak only manifests on Linux via the /proc/self/fd table.
+	if (process.platform !== 'linux') {
+		t.pass();
+		return;
+	}
+
+	// The devTty() path requires an openable controlling tty. In CI/sandbox
+	// there is none (ENXIO), so skip just like the resize test does.
+	let probe;
+	try {
+		probe = fs.openSync('/dev/tty', fs.constants.O_NONBLOCK);
+	} catch {
+		t.pass();
+		return;
+	}
+
+	fs.closeSync(probe);
+
+	const countFds = () => fs.readdirSync('/proc/self/fd').length;
+
+	// Let any one-time allocations settle before measuring the baseline.
+	for (let index = 0; index < 100; index++) {
+		terminalSize();
+	}
+
+	const before = countFds();
+
+	for (let index = 0; index < 1000; index++) {
+		terminalSize();
+	}
+
+	const after = countFds();
+
+	// With the leak, each call retained at least one /dev/tty descriptor, so
+	// 1000 calls would add roughly 1000 fds. Allow a small slack for unrelated
+	// churn (the ava worker's own async I/O).
+	t.true(after - before < 50, `file descriptor count grew from ${before} to ${after}`);
+});

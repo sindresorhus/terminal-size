@@ -82,7 +82,7 @@ test('no TERM environment variable', t => {
 });
 
 test('devTty does not leak /dev/tty file descriptors across many terminalSize() calls', t => {
-	// The leak only manifests on Linux via the /proc/self/fd table.
+	// Linux exposes the process's file descriptors via /proc/self/fd.
 	if (process.platform !== 'linux') {
 		t.pass();
 		return;
@@ -119,4 +119,39 @@ test('devTty does not leak /dev/tty file descriptors across many terminalSize() 
 	// 1000 calls would add roughly 1000 fds. Allow a small slack for unrelated
 	// churn (the ava worker's own async I/O).
 	t.true(after - before < 50, `file descriptor count grew from ${before} to ${after}`);
+});
+
+test('terminalSize() does not leak file descriptors on macOS', async t => {
+	if (process.platform !== 'darwin') {
+		t.pass();
+		return;
+	}
+
+	const temporaryDirectoryRoot = path.join(process.cwd(), 'temporary');
+	await fsPromises.mkdir(temporaryDirectoryRoot, {recursive: true});
+	const temporaryDirectory = await fsPromises.mkdtemp(path.join(temporaryDirectoryRoot, 'terminal-size-'));
+	const resultPath = path.join(temporaryDirectory, 'result.json');
+
+	try {
+		await execa('expect', [
+			'-c',
+			'set stty_init {rows 31 columns 97}\nspawn -noecho $env(NODE_BINARY) $env(FIXTURE_PATH)\nexpect eof\nset result [wait]\nexit [lindex $result 3]',
+		], {
+			env: {
+				...process.env,
+				FIXTURE_PATH: path.join(process.cwd(), 'fixture-file-descriptor-count.js'),
+				NODE_BINARY: process.execPath,
+				RESULT_PATH: resultPath,
+			},
+		});
+
+		const {before, after, size} = JSON.parse(await fsPromises.readFile(resultPath, 'utf8'));
+		t.deepEqual(
+			{fileDescriptorCount: after, size},
+			{fileDescriptorCount: before, size: {columns: 97, rows: 31}},
+			`file descriptor count grew from ${before} to ${after}`,
+		);
+	} finally {
+		await fsPromises.rm(temporaryDirectory, {recursive: true, force: true});
+	}
 });

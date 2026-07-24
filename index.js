@@ -92,7 +92,7 @@ export default function terminalSize() {
 	}
 
 	if (process.platform === 'darwin') {
-		return devTty() ?? tput() ?? fallback;
+		return stty() ?? tput() ?? fallback;
 	}
 
 	return devTty() ?? tput() ?? resize() ?? fallback;
@@ -101,9 +101,7 @@ export default function terminalSize() {
 const devTty = () => {
 	let fd;
 	try {
-		// eslint-disable-next-line no-bitwise
-		const flags = process.platform === 'darwin' ? fs.constants.O_EVTONLY | fs.constants.O_NONBLOCK : fs.constants.O_NONBLOCK;
-		fd = fs.openSync('/dev/tty', flags);
+		fd = fs.openSync('/dev/tty', fs.constants.O_NONBLOCK);
 		// eslint-disable-next-line new-cap
 		const stream = tty.WriteStream(fd);
 		// A WriteStream can emit 'error' asynchronously on teardown; with no
@@ -119,6 +117,17 @@ const devTty = () => {
 			} catch {}
 		}
 	}
+};
+
+const stty = () => {
+	try {
+		// `-f` makes stty own the /dev/tty descriptor lifecycle.
+		const [rows, columns] = exec('stty', ['-f', '/dev/tty', 'size']).split(/\s+/);
+
+		if (columns && rows) {
+			return create(columns, rows);
+		}
+	} catch {}
 };
 
 // On macOS, this only returns correct values when stdout is not redirected.
